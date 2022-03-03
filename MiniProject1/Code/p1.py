@@ -89,16 +89,27 @@ logging.basicConfig(filename="{}/resnet-18.log".format(args.checkpoint), format=
 logger = logging.getLogger()
 logger.setLevel(logging.DEBUG)
 
+# adding random crop
+trfl = [transforms.RandomHorizontalFlip(0.5),
+        transforms.ToTensor(),
+        transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5)),
+        transforms.RandomCrop(32)
+]
+tefl = [transforms.ToTensor(),
+        transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5))]
+trfl = transforms.Compose(trfl)
+tefl = transforms.Compose(tefl)
+
 
 # version with adding normalize
-trfl = [transforms.RandomHorizontalFlip(0.5),
+"""trfl = [transforms.RandomHorizontalFlip(0.5),
         transforms.ToTensor(),
         transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5))
 ]
 tefl = [transforms.ToTensor(),
         transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5))]
 trfl = transforms.Compose(trfl)
-tefl = transforms.Compose(tefl)
+tefl = transforms.Compose(tefl)"""
 
 # version without adding normalize
 """trfl = [transforms.RandomHorizontalFlip(0.5),
