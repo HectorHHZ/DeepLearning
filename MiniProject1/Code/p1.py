@@ -8,6 +8,7 @@ from timm.loss import LabelSmoothingCrossEntropy
 import logging
 import argparse
 import os
+import numpy as np
 
 class BasicBlock(nn.Module):
 
@@ -88,12 +89,26 @@ logging.basicConfig(filename="{}/resnet-18.log".format(args.checkpoint), format=
 logger = logging.getLogger()
 logger.setLevel(logging.DEBUG)
 
+
+# version with adding normalize
 trfl = [transforms.RandomHorizontalFlip(0.5),
         transforms.ToTensor(),
+        transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5))
+]
+tefl = [transforms.ToTensor(),
+        transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5))]
+trfl = transforms.Compose(trfl)
+tefl = transforms.Compose(tefl)
+
+# version without adding normalize
+"""trfl = [transforms.RandomHorizontalFlip(0.5),
+        transforms.ToTensor()
 ]
 tefl = [transforms.ToTensor()]
 trfl = transforms.Compose(trfl)
-tefl = transforms.Compose(tefl)
+tefl = transforms.Compose(tefl)"""
+
+# testing interval
 interval = 50
 
 trainingdata = torchvision.datasets.CIFAR10('./CIFAR10/',
@@ -104,6 +119,9 @@ trainingdata = torchvision.datasets.CIFAR10('./CIFAR10/',
 testdata = torchvision.datasets.CIFAR10('./CIFAR10/',train=False,download=True,transform=tefl)
 
 net = ResNet(BasicBlock, [2, 2, 2, 2]).cuda()
+
+
+# two ways of entropy
 if args.smooth:
     print("using label smooth")
     Loss = LabelSmoothingCrossEntropy(0.1)
@@ -112,6 +130,10 @@ else:
     Loss = torch.nn.CrossEntropyLoss()
 optimizer = torch.optim.SGD(net.parameters(), lr=0.1, momentum=0.9, weight_decay=0.0001)
 scheduler = torch.optim.lr_scheduler.StepLR(optimizer, args.decay_step)
+
+
+# X_train_mean = np.mean(trainingdata, axis=(0,1))
+# X_train_std = np.std(trainingdata, axis=(0,1))
 
 trainDataLoader = torch.utils.data.DataLoader(trainingdata,batch_size=args.bs,shuffle=True)
 testDataLoader = torch.utils.data.DataLoader(testdata,batch_size=args.bs,shuffle=False)
