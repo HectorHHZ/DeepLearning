@@ -211,7 +211,8 @@ for epoch in range(200):
             # predicted_output = net(images)
             # with ema
             predicted_output = ema_model.ema(images)
-            # ema_model.update(net)
+            if ema_model is not None:
+                ema_model.update(net)
             fit = Loss(predicted_output, labels)
             test_loss += fit.item()
             correct_points_test += (torch.eq(torch.max(predicted_output, 1)[1], labels).sum()).data.cpu().numpy()
