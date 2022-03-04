@@ -87,7 +87,7 @@ parser = argparse.ArgumentParser()
 parser.add_argument('--bs', default=128, metavar='N', type=int)
 parser.add_argument('--lr', type=float, default=0.1, metavar='LR',
                     help='learning rate (default: 0.1)')
-parser.add_argument('--decay_step', default=50, metavar='N', type=int)
+parser.add_argument('--decay_step', default=40, metavar='N', type=int)
 parser.add_argument('--checkpoint', default='resnet-18', type=str, metavar='checkpoint')
 parser.add_argument('--smooth', action='store_true', default=True)
 args = parser.parse_args()
@@ -107,7 +107,7 @@ logger.setLevel(logging.DEBUG)
 trfl = [transforms.RandomHorizontalFlip(0.5),
         transforms.ToTensor(),
         transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5)),
-        transforms.RandomCrop(32)
+        transforms.RandomCrop(32, padding=4)
         ]
 tefl = [transforms.ToTensor(),
         transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5))]
@@ -191,7 +191,8 @@ for epoch in range(200):
         # print(predicted_output)
         fit = Loss(predicted_output, labels)
         fit.backward()
-        ema_model.update(net)
+        if ema_model is not None:
+            ema_model.update(net)
         optimizer.step()
         train_loss += fit.item()
         correct_points_train += (torch.eq(torch.max(predicted_output, 1)[1], labels).sum()).data.cpu().numpy()
@@ -210,9 +211,9 @@ for epoch in range(200):
             # without ema
             # predicted_output = net(images)
             # with ema
-            predicted_output = ema_model.ema(images)
-            if ema_model is not None:
-                ema_model.update(net)
+            predicted_output = net(images)
+            # if ema_model is not None:
+            #     ema_model.update(net)
             fit = Loss(predicted_output, labels)
             test_loss += fit.item()
             correct_points_test += (torch.eq(torch.max(predicted_output, 1)[1], labels).sum()).data.cpu().numpy()
