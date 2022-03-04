@@ -5,10 +5,16 @@ import ssl
 import torchvision
 from torchvision import transforms
 from timm.loss import LabelSmoothingCrossEntropy
+import timm
 import logging
 import argparse
 import os
 import numpy as np
+from timm.utils import *
+from timm.optim import create_optimizer_v2, optimizer_kwargs
+from timm.scheduler import create_scheduler
+from timm.utils import ApexScaler, NativeScaler
+
 
 class BasicBlock(nn.Module):
 
@@ -36,6 +42,7 @@ class BasicBlock(nn.Module):
         out = F.relu(out)
         return out
 
+
 class ResNet(nn.Module):
     def __init__(self, block, num_blocks, num_classes=10):
         super(ResNet, self).__init__()
@@ -51,7 +58,7 @@ class ResNet(nn.Module):
         self.linear = nn.Linear(512, num_classes)
 
     def _make_layer(self, block, planes, num_blocks, stride):
-        strides = [stride] + [1]*(num_blocks-1)
+        strides = [stride] + [1] * (num_blocks - 1)
         layers = []
         for stride in strides:
             layers.append(block(self.in_planes, planes, stride))
@@ -69,13 +76,20 @@ class ResNet(nn.Module):
         out = self.linear(out)
         return out
 
+
+# check GPU
+print(torch.cuda.is_available())
+print(torch.torch_version)
+device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
+print(device)
+
 parser = argparse.ArgumentParser()
 parser.add_argument('--bs', default=128, metavar='N', type=int)
 parser.add_argument('--lr', type=float, default=0.1, metavar='LR',
                     help='learning rate (default: 0.1)')
 parser.add_argument('--decay_step', default=50, metavar='N', type=int)
 parser.add_argument('--checkpoint', default='resnet-18', type=str, metavar='checkpoint')
-parser.add_argument('--smooth', action='store_true',default=True)
+parser.add_argument('--smooth', action='store_true', default=True)
 args = parser.parse_args()
 print(args)
 
@@ -94,12 +108,11 @@ trfl = [transforms.RandomHorizontalFlip(0.5),
         transforms.ToTensor(),
         transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5)),
         transforms.RandomCrop(32)
-]
+        ]
 tefl = [transforms.ToTensor(),
         transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5))]
 trfl = transforms.Compose(trfl)
 tefl = transforms.Compose(tefl)
-
 
 # version with adding normalize
 """trfl = [transforms.RandomHorizontalFlip(0.5),
@@ -127,10 +140,11 @@ trainingdata = torchvision.datasets.CIFAR10('./CIFAR10/',
                                             download=True,
                                             transform=trfl
                                             )
-testdata = torchvision.datasets.CIFAR10('./CIFAR10/',train=False,download=True,transform=tefl)
+testdata = torchvision.datasets.CIFAR10('./CIFAR10/', train=False, download=True, transform=tefl)
 
 net = ResNet(BasicBlock, [2, 2, 2, 2]).cuda()
 
+print(torch.cuda.get_device_name(0))
 
 # two ways of entropy
 if args.smooth:
@@ -139,15 +153,19 @@ if args.smooth:
 else:
     print("using cross entropy loss")
     Loss = torch.nn.CrossEntropyLoss()
-optimizer = torch.optim.SGD(net.parameters(), lr=0.1, momentum=0.9, weight_decay=0.0001)
+optimizer = torch.optim.SGD(net.parameters(), lr=0.2, momentum=0.9, weight_decay=0.0001)
+# lr 0.1 with
 scheduler = torch.optim.lr_scheduler.StepLR(optimizer, args.decay_step)
 
+# test the EMA
+# EMA model with decay
+ema_model = ModelEma(net, decay=0.998)
 
 # X_train_mean = np.mean(trainingdata, axis=(0,1))
 # X_train_std = np.std(trainingdata, axis=(0,1))
 
-trainDataLoader = torch.utils.data.DataLoader(trainingdata,batch_size=args.bs,shuffle=True)
-testDataLoader = torch.utils.data.DataLoader(testdata,batch_size=args.bs,shuffle=False)
+trainDataLoader = torch.utils.data.DataLoader(trainingdata, batch_size=args.bs, shuffle=True)
+testDataLoader = torch.utils.data.DataLoader(testdata, batch_size=args.bs, shuffle=False)
 train_loss_history = []
 test_loss_history = []
 train_acc_history = []
@@ -164,15 +182,22 @@ for epoch in range(200):
         images = images.cuda()
         labels = labels.cuda()
         optimizer.zero_grad()
+        # without ema
         predicted_output = net(images)
-        fit = Loss(predicted_output,labels)
+        # print(predicted_output)
+        # with ema
+        # predicted_output = ema_model.ema(images)
+        # predicted_output.requires_grad_()
+        # print(predicted_output)
+        fit = Loss(predicted_output, labels)
         fit.backward()
+        ema_model.update(net)
         optimizer.step()
         train_loss += fit.item()
-        correct_points_train += (torch.eq(torch.max(predicted_output, 1)[1],labels).sum()).data.cpu().numpy()
+        correct_points_train += (torch.eq(torch.max(predicted_output, 1)[1], labels).sum()).data.cpu().numpy()
         if i % interval == 0 and i != 0:
-            info = 'Epoch [%d][%d/%d] lr: %f, loss_ce: %f'%(epoch, i, len(trainDataLoader),
-                                                                  scheduler.get_last_lr()[0], fit.item())
+            info = 'Epoch [%d][%d/%d] lr: %f, loss_ce: %f' % (epoch, i, len(trainDataLoader),
+                                                              scheduler.get_last_lr()[0], fit.item())
             print(info)
             logger.info(info)
 
@@ -182,16 +207,20 @@ for epoch in range(200):
             images, labels = data
             images = images.cuda()
             labels = labels.cuda()
-            predicted_output = net(images)
-            fit = Loss(predicted_output,labels)
+            # without ema
+            # predicted_output = net(images)
+            # with ema
+            predicted_output = ema_model.ema(images)
+            # ema_model.update(net)
+            fit = Loss(predicted_output, labels)
             test_loss += fit.item()
-            correct_points_test += (torch.eq(torch.max(predicted_output, 1)[1],labels).sum()).data.cpu().numpy()
-    train_loss = train_loss/len(trainDataLoader)
-    test_loss = test_loss/len(testDataLoader)
+            correct_points_test += (torch.eq(torch.max(predicted_output, 1)[1], labels).sum()).data.cpu().numpy()
+    train_loss = train_loss / len(trainDataLoader)
+    test_loss = test_loss / len(testDataLoader)
     train_loss_history.append(train_loss)
     test_loss_history.append(test_loss)
-    train_acc = correct_points_train*100/len(trainingdata)
-    test_acc = correct_points_test*100/len(testdata)
+    train_acc = correct_points_train * 100 / len(trainingdata)
+    test_acc = correct_points_test * 100 / len(testdata)
     train_acc_history.append(train_acc)
     test_acc_history.append(test_acc)
     info = '==== Epoch %s, Train loss %f, Test acc %f ====' % (epoch, train_loss, test_acc)
