@@ -83,9 +83,13 @@ print(torch.torch_version)
 device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 print(device)
 
+
+# lr testing result:
+# 0.1 -> 93
+# 0.2 -> 91 (to be tested)
 parser = argparse.ArgumentParser()
 parser.add_argument('--bs', default=128, metavar='N', type=int)
-parser.add_argument('--lr', type=float, default=0.1, metavar='LR',
+parser.add_argument('--lr', type=float, default=0.2, metavar='LR',
                     help='learning rate (default: 0.1)')
 parser.add_argument('--decay_step', default=40, metavar='N', type=int)
 parser.add_argument('--checkpoint', default='resnet-18', type=str, metavar='checkpoint')
@@ -103,21 +107,37 @@ logging.basicConfig(filename="{}/resnet-18.log".format(args.checkpoint), format=
 logger = logging.getLogger()
 logger.setLevel(logging.DEBUG)
 
-# adding random crop
-trfl = [transforms.RandomHorizontalFlip(0.5),
+# random brightness and contrast
+# cnm sha yong mei you
+trfl = [#transforms.ColorJitter(brightness=.5, hue=.5),
+        transforms.RandomCrop(32, padding=4),
+        transforms.RandomHorizontalFlip(0.5),
         transforms.ToTensor(),
-        transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5)),
-        transforms.RandomCrop(32, padding=4)
+        transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5))
         ]
 tefl = [transforms.ToTensor(),
         transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5))]
 trfl = transforms.Compose(trfl)
 tefl = transforms.Compose(tefl)
 
+
+# adding random crop
+# 93 approximately
+"""trfl = [transforms.RandomCrop(32, padding=4),
+        transforms.RandomHorizontalFlip(0.5),
+        transforms.ToTensor(),
+        transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5))
+        ]
+tefl = [transforms.ToTensor(),
+        transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5))]
+trfl = transforms.Compose(trfl)
+tefl = transforms.Compose(tefl)"""
+
+
 # version with adding normalize
 """trfl = [transforms.RandomHorizontalFlip(0.5),
         transforms.ToTensor(),
-        transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5))
+        transforms.Normalize((0.5,d 0.5, 0.5), (0.5, 0.5, 0.5))
 ]
 tefl = [transforms.ToTensor(),
         transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5))]
@@ -153,7 +173,7 @@ if args.smooth:
 else:
     print("using cross entropy loss")
     Loss = torch.nn.CrossEntropyLoss()
-optimizer = torch.optim.SGD(net.parameters(), lr=0.2, momentum=0.9, weight_decay=0.0001)
+optimizer = torch.optim.SGD(net.parameters(), lr=args.lr, momentum=0.9, weight_decay=0.0001)
 # lr 0.1 with
 scheduler = torch.optim.lr_scheduler.StepLR(optimizer, args.decay_step)
 
