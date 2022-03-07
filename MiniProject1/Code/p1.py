@@ -14,6 +14,7 @@ from timm.utils import *
 from timm.optim import create_optimizer_v2, optimizer_kwargs
 from timm.scheduler import create_scheduler
 from timm.utils import ApexScaler, NativeScaler
+from prettytable import PrettyTable
 
 
 class BasicBlock(nn.Module):
@@ -51,11 +52,11 @@ class ResNet(nn.Module):
         self.conv1 = nn.Conv2d(3, 64, kernel_size=3,
                                stride=1, padding=1, bias=False)
         self.bn1 = nn.BatchNorm2d(64)
-        self.layer1 = self._make_layer(block, 64, num_blocks[0], stride=1)
-        self.layer2 = self._make_layer(block, 128, num_blocks[1], stride=2)
-        self.layer3 = self._make_layer(block, 256, num_blocks[2], stride=2)
-        self.layer4 = self._make_layer(block, 512, num_blocks[3], stride=2)
-        self.linear = nn.Linear(512, num_classes)
+        self.layer1 = self._make_layer(block, 32, num_blocks[0], stride=1)
+        self.layer2 = self._make_layer(block, 64, num_blocks[1], stride=2)
+        self.layer3 = self._make_layer(block, 128, num_blocks[2], stride=2)
+        self.layer4 = self._make_layer(block, 256, num_blocks[3], stride=2)
+        self.linear = nn.Linear(256, num_classes)
 
     def _make_layer(self, block, planes, num_blocks, stride):
         strides = [stride] + [1] * (num_blocks - 1)
@@ -83,13 +84,12 @@ print(torch.torch_version)
 device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 print(device)
 
-
 # lr testing result:
 # 0.1 -> 93
 # 0.2 -> 91 (to be tested)
 parser = argparse.ArgumentParser()
 parser.add_argument('--bs', default=128, metavar='N', type=int)
-parser.add_argument('--lr', type=float, default=0.2, metavar='LR',
+parser.add_argument('--lr', type=float, default=0.1, metavar='LR',
                     help='learning rate (default: 0.1)')
 parser.add_argument('--decay_step', default=40, metavar='N', type=int)
 parser.add_argument('--checkpoint', default='resnet-18', type=str, metavar='checkpoint')
@@ -107,9 +107,23 @@ logging.basicConfig(filename="{}/resnet-18.log".format(args.checkpoint), format=
 logger = logging.getLogger()
 logger.setLevel(logging.DEBUG)
 
+# gray size
+trfl = [  # transforms.ColorJitter(brightness=.5, hue=.5),
+    transforms.RandomCrop(32, padding=4),
+    transforms.RandomHorizontalFlip(0.5),
+    # transforms.Grayscale(),
+    transforms.ToTensor(),
+    # transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5))
+]
+tefl = [transforms.ToTensor(),
+        # transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5))
+        ]
+trfl = transforms.Compose(trfl)
+tefl = transforms.Compose(tefl)
+
 # random brightness and contrast
 # cnm sha yong mei you
-trfl = [#transforms.ColorJitter(brightness=.5, hue=.5),
+"""trfl = [# transforms.ColorJitter(brightness=.5, hue=.5),
         transforms.RandomCrop(32, padding=4),
         transforms.RandomHorizontalFlip(0.5),
         transforms.ToTensor(),
@@ -118,8 +132,7 @@ trfl = [#transforms.ColorJitter(brightness=.5, hue=.5),
 tefl = [transforms.ToTensor(),
         transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5))]
 trfl = transforms.Compose(trfl)
-tefl = transforms.Compose(tefl)
-
+tefl = transforms.Compose(tefl)"""
 
 # adding random crop
 # 93 approximately
@@ -132,7 +145,6 @@ tefl = [transforms.ToTensor(),
         transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5))]
 trfl = transforms.Compose(trfl)
 tefl = transforms.Compose(tefl)"""
-
 
 # version with adding normalize
 """trfl = [transforms.RandomHorizontalFlip(0.5),
@@ -162,7 +174,7 @@ trainingdata = torchvision.datasets.CIFAR10('./CIFAR10/',
                                             )
 testdata = torchvision.datasets.CIFAR10('./CIFAR10/', train=False, download=True, transform=tefl)
 
-net = ResNet(BasicBlock, [2, 2, 2, 2]).cuda()
+net = ResNet(BasicBlock, [3, 3, 3, 3]).cuda()
 
 print(torch.cuda.get_device_name(0))
 
@@ -181,9 +193,26 @@ scheduler = torch.optim.lr_scheduler.StepLR(optimizer, args.decay_step)
 # EMA model with decay
 ema_model = ModelEma(net, decay=0.998)
 
+
 # X_train_mean = np.mean(trainingdata, axis=(0,1))
 # X_train_std = np.std(trainingdata, axis=(0,1))
 
+
+# counting parameters
+def count_parameters(model):
+    table = PrettyTable(["Modules", "Parameters"])
+    total_params = 0
+    for name, parameter in model.named_parameters():
+        if not parameter.requires_grad: continue
+        params = parameter.numel()
+        table.add_row([name, params])
+        total_params += params
+    print(table)
+    print(f"Total Trainable Params: {total_params}")
+    return total_params
+
+
+count_parameters(net)
 trainDataLoader = torch.utils.data.DataLoader(trainingdata, batch_size=args.bs, shuffle=True)
 testDataLoader = torch.utils.data.DataLoader(testdata, batch_size=args.bs, shuffle=False)
 train_loss_history = []
@@ -211,8 +240,8 @@ for epoch in range(200):
         # print(predicted_output)
         fit = Loss(predicted_output, labels)
         fit.backward()
-        if ema_model is not None:
-            ema_model.update(net)
+        # if ema_model is not None:
+        # ema_model.update(net)
         optimizer.step()
         train_loss += fit.item()
         correct_points_train += (torch.eq(torch.max(predicted_output, 1)[1], labels).sum()).data.cpu().numpy()
@@ -232,8 +261,8 @@ for epoch in range(200):
             # predicted_output = net(images)
             # with ema
             predicted_output = net(images)
-            # if ema_model is not None:
-            #     ema_model.update(net)
+            if ema_model is not None:
+                ema_model.update(net)
             fit = Loss(predicted_output, labels)
             test_loss += fit.item()
             correct_points_test += (torch.eq(torch.max(predicted_output, 1)[1], labels).sum()).data.cpu().numpy()
