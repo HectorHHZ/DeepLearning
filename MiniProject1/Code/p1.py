@@ -185,7 +185,12 @@ if args.smooth:
 else:
     print("using cross entropy loss")
     Loss = torch.nn.CrossEntropyLoss()
+
+# SGD
 optimizer = torch.optim.SGD(net.parameters(), lr=args.lr, momentum=0.9, weight_decay=0.0001)
+
+# Adam
+# optimizer = torch.optim.Adam(net.parameters(), lr=args.lr, betas=(0.9, 0.999), eps=1e-8, weight_decay=0.0001)
 # lr 0.1 with
 scheduler = torch.optim.lr_scheduler.StepLR(optimizer, args.decay_step)
 
@@ -283,7 +288,7 @@ for epoch in range(200):
         logger.info(info)
         torch.save(net.state_dict(), '{}/resnet-18-{}.pth'.format(args.checkpoint, epoch))
 
-f = open('bs-%s lr-%f -ds%s.txt' % (args.bs, args.lr, args.decay_step), 'w')
+f = open('bs-%s lr-%f -ds%s without ema' % (args.bs, args.lr, args.decay_step), 'w')
 f.write(str(test_acc_history))
 f.close()
 torch.save(net.state_dict(), '{}/resnet-18-final.pth'.format(args.checkpoint))
