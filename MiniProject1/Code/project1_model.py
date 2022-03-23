@@ -286,9 +286,9 @@ for epoch in range(200):
         info = 'saved checkpoint at epoch {}'.format(epoch)
         print(info)
         logger.info(info)
-        torch.save(net.state_dict(), '{}/resnet-18-{}.pth'.format(args.checkpoint, epoch))
+        torch.save(net.state_dict(), '{}/resnet-18-{}.pt'.format(args.checkpoint, epoch))
 
 f = open('bs-%s lr-%f -ds%s without ema' % (args.bs, args.lr, args.decay_step), 'w')
 f.write(str(test_acc_history))
 f.close()
-torch.save(net.state_dict(), '{}/resnet-18-final.pth'.format(args.checkpoint))
+torch.save(net.state_dict(), '{}/resnet-18-final.pt'.format(args.checkpoint))
