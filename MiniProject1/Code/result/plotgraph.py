@@ -6,6 +6,20 @@ a = open("bs-64 lr-0.100000 -ds30.txt", "r").readlines()
 b = open('bs-64 lr-0.100000 -ds40.txt', 'r').readlines()
 c = open('bs-64 lr-0.100000 -ds50.txt', 'r').readlines()
 d = open('bs-64 lr-0.100000 -ds60.txt', 'r').readlines()
+
+e = open('bs-32 lr-0.100000 -ds40.txt', 'r').readlines()
+f = open('bs-64 lr-0.100000 -ds40.txt', 'r').readlines()
+g = open('bs-64 lr-0.100000 -ds60.txt', 'r').readlines()
+h = open('bs-64 lr-0.100000 -ds60.txt', 'r').readlines()
+i = open('bs-64 lr-0.100000 -ds60.txt', 'r').readlines()
+j = open('bs-64 lr-0.100000 -ds60.txt', 'r').readlines()
+k = open('bs-64 lr-0.100000 -ds60.txt', 'r').readlines()
+l = open('bs-64 lr-0.100000 -ds60.txt', 'r').readlines()
+m = open('bs-64 lr-0.100000 -ds60.txt', 'r').readlines()
+n = open('bs-64 lr-0.100000 -ds60.txt', 'r').readlines()
+o = open('bs-64 lr-0.100000 -ds60.txt', 'r').readlines()
+p = open('bs-64 lr-0.100000 -ds60.txt', 'r').readlines()
+
 #将txt文件转换成数组形式保存
 for fields1 in a:
     fields1 = fields1.strip()
@@ -46,3 +60,5 @@ plt.plot(X, Y3, label = '3')
 plt.plot(X, Y4, label = '4')
 plt.legend()
 plt.show()
+
+
