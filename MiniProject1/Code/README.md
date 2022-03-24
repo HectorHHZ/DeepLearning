@@ -16,7 +16,7 @@ To run the code, you can run `project1.py --bs 128 --lr 0.1 --decay_step 40 --ch
 
 To get the best result, you can run `python project1_model.py --bs 64 --lr 0.1 --decay_step 50`
 
-* To see the best result, please refer to `./result/bs-64 lr-0.100000 -ds50.txt` . The accuracy is higher than 94%.
+* To see the best result, please refer to `./result/bs-64 lr-0.100000 -ds50.txt` . The accuracy is higher than 93%.
 * To see figures of other experiments, please refer to `adam.png`,`batch_size.png`, `decay_step.png`, and`learning_rate.png`.
 * To see the parameters of the Resnet, please refer to`img.png`
 
