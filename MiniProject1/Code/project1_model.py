@@ -288,7 +288,7 @@ for epoch in range(200):
         logger.info(info)
         torch.save(net.state_dict(), '{}/resnet-18-{}.pt'.format(args.checkpoint, epoch))
 
-f = open('bs-%s lr-%f -ds%s without ema' % (args.bs, args.lr, args.decay_step), 'w')
+f = open('bs-%s lr-%f -ds%s with ema' % (args.bs, args.lr, args.decay_step), 'w')
 f.write(str(test_acc_history))
 f.close()
 torch.save(net.state_dict(), '{}/resnet-18-final.pt'.format(args.checkpoint))

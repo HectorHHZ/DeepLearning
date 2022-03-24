@@ -13,4 +13,4 @@ source /share/apps/anaconda3/2020.07/etc/profile.d/conda.sh
 conde activate ~/penv
 export PATH=~/penv/bin:$PATH
 
-python ~/code/project1_model.py --bs 64 --lr 0.1 --decay_step 50
+python ~/code/project1_model.py --bs 64 --lr 0.10 --decay_step 50
