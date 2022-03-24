@@ -2,11 +2,8 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="2eacb135-c7ad-40ea-affd-96c38f12ec8b" name="Changes" comment="">
-      <change afterPath="$PROJECT_DIR$/img.png" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/learning_rate.png" beforeDir="false" afterPath="$PROJECT_DIR$/learning_rate.png" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/project1.sbatch" beforeDir="false" afterPath="$PROJECT_DIR$/project1.sbatch" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/result/plotgraph.py" beforeDir="false" afterPath="$PROJECT_DIR$/result/plotgraph.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -84,7 +81,7 @@
       <option name="number" value="Default" />
       <option name="presentableId" value="Default" />
       <updated>1647985762283</updated>
-      <workItem from="1647985766178" duration="50949000" />
+      <workItem from="1647985766178" duration="51161000" />
     </task>
     <servers />
   </component>
