@@ -1,4 +1,12 @@
-# README
+# RestNet Mini-Project 1
+
+This repository is for NYU ECE-7123 deep learning Mini-Project1. Team members:
+
+* Name: Shunyi Zhu  NetID:sz3719
+* Name:Zhen Wang   NetID:zw2655
+* Name: Haoze He     NetID: hh2537
+
+
 
 ### Run the Code
 
@@ -12,7 +20,7 @@ To run the code, you can run `project1.py --bs 128 --lr 0.1 --decay_step 40 --ch
 
 
 
-### Best Configuration
+### Best Configuration and Architecture
 
 To get the best result, you can run `python project1_model.py --bs 64 --lr 0.1 --decay_step 50`
 
