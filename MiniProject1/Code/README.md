@@ -1,13 +1,24 @@
 # README
 
-type python p1.py --bs 128 --lr 0.1 --decay_step 40 --checkpoint "{}/resnet-18.log" --smooth
+### Run the Code
 
-bs: batch size, default 128
+To run the code, you can run `project1.py --bs 128 --lr 0.1 --decay_step 40 --checkpoint "{}/resnet-18.log" --smooth`
 
-lr: learning rate, default 0.1
+* `bs`: batch size, default 128
+* `lr`: learning rate, default 0.1
+* `decay_ step`: decay step default 40
+* `checkpoint`: file saving directory, default "{}/resnet-18.log"
+* `smooth`: Label Smoothing Cross Entropy or Simple Cross Entropy, defalut Label Smoothing Cross Entropy
 
-decay_ step: decay step default 40
 
-checkpoint: file saving directory, default "{}/resnet-18.log"
 
-smooth: Label Smoothing Cross Entropy or Simple Cross Entropy, defalut Label Smoothing Cross Entropy
+### Best Configuration
+
+To get the best result, you can run `python project1_model.py --bs 64 --lr 0.1 --decay_step 50`
+
+* To see the best result, please refer to `./result/bs-64 lr-0.100000 -ds50.txt` . The accuracy is higher than 94%.
+* To see figures of other experiments, please refer to `adam.png`,`batch_size.png`, `decay_step.png`, and`learning_rate.png`.
+* To see the parameters of the Resnet, please refer to`img.png`
+
+
+
