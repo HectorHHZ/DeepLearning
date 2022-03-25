@@ -47,16 +47,21 @@ class BasicBlock(nn.Module):
 class ResNet(nn.Module):
     def __init__(self, block, num_blocks, num_classes=10):
         super(ResNet, self).__init__()
-        self.in_planes = 64
+        self.in_planes = 32
 
-        self.conv1 = nn.Conv2d(3, 64, kernel_size=3,
+        self.conv1 = nn.Conv2d(3, 32, kernel_size=3,
                                stride=1, padding=1, bias=False)
-        self.bn1 = nn.BatchNorm2d(64)
+        self.bn1 = nn.BatchNorm2d(32)
         self.layer1 = self._make_layer(block, 32, num_blocks[0], stride=1)
         self.layer2 = self._make_layer(block, 64, num_blocks[1], stride=2)
         self.layer3 = self._make_layer(block, 128, num_blocks[2], stride=2)
         self.layer4 = self._make_layer(block, 256, num_blocks[3], stride=2)
         self.linear = nn.Linear(256, num_classes)
+
+        # weight initialization
+        #for m in self.modules():
+            # isinstance(m,nn.Linear):
+                #m.weight.data = nn.init.kaiming_normal_(m.weight.data,mode='fan_out', nonlinearity='relu')
 
     def _make_layer(self, block, planes, num_blocks, stride):
         strides = [stride] + [1] * (num_blocks - 1)
@@ -88,10 +93,10 @@ print(device)
 # 0.1 -> 93
 # 0.2 -> 91 (to be tested)
 parser = argparse.ArgumentParser()
-parser.add_argument('--bs', default=128, metavar='N', type=int)
+parser.add_argument('--bs', default=64, metavar='N', type=int)
 parser.add_argument('--lr', type=float, default=0.1, metavar='LR',
                     help='learning rate (default: 0.1)')
-parser.add_argument('--decay_step', default=40, metavar='N', type=int)
+parser.add_argument('--decay_step', default=50, metavar='N', type=int)
 parser.add_argument('--checkpoint', default='resnet-18', type=str, metavar='checkpoint')
 parser.add_argument('--smooth', action='store_true', default=True)
 args = parser.parse_args()
@@ -108,7 +113,7 @@ logger = logging.getLogger()
 logger.setLevel(logging.DEBUG)
 
 # gray size
-trfl = [  # transforms.ColorJitter(brightness=.5, hue=.5),
+"""trfl = [  # transforms.ColorJitter(brightness=.5, hue=.5),
     transforms.RandomCrop(32, padding=4),
     transforms.RandomHorizontalFlip(0.5),
     # transforms.Grayscale(),
@@ -119,7 +124,7 @@ tefl = [transforms.ToTensor(),
         # transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5))
         ]
 trfl = transforms.Compose(trfl)
-tefl = transforms.Compose(tefl)
+tefl = transforms.Compose(tefl)"""
 
 # random brightness and contrast
 # cnm sha yong mei you
@@ -136,15 +141,16 @@ tefl = transforms.Compose(tefl)"""
 
 # adding random crop
 # 93 approximately
-"""trfl = [transforms.RandomCrop(32, padding=4),
+trfl = [transforms.RandomCrop(32, padding=4),
         transforms.RandomHorizontalFlip(0.5),
         transforms.ToTensor(),
-        transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5))
+        # transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5))
         ]
-tefl = [transforms.ToTensor(),
-        transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5))]
+tefl = [transforms.ToTensor()
+        # transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5))]
+        ]
 trfl = transforms.Compose(trfl)
-tefl = transforms.Compose(tefl)"""
+tefl = transforms.Compose(tefl)
 
 # version with adding normalize
 """trfl = [transforms.RandomHorizontalFlip(0.5),
@@ -174,7 +180,7 @@ trainingdata = torchvision.datasets.CIFAR10('./CIFAR10/',
                                             )
 testdata = torchvision.datasets.CIFAR10('./CIFAR10/', train=False, download=True, transform=tefl)
 
-net = ResNet(BasicBlock, [3, 3, 3, 3]).cuda()
+net = ResNet(BasicBlock, [3, 6, 4, 3]).cuda()
 
 print(torch.cuda.get_device_name(0))
 
@@ -288,7 +294,7 @@ for epoch in range(200):
         logger.info(info)
         torch.save(net.state_dict(), '{}/resnet-18-{}.pt'.format(args.checkpoint, epoch))
 
-f = open('bs-%s lr-%f -ds%s with ema' % (args.bs, args.lr, args.decay_step), 'w')
+f = open('opti', 'w')
 f.write(str(test_acc_history))
 f.close()
 torch.save(net.state_dict(), '{}/resnet-18-final.pt'.format(args.checkpoint))

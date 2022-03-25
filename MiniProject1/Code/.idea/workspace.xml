@@ -2,8 +2,15 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="2eacb135-c7ad-40ea-affd-96c38f12ec8b" name="Changes" comment="">
+      <change afterPath="$PROJECT_DIR$/para.txt" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/resnet-18/project1_model.pt" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/resnet-18/resnet-18-final.pt" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/project1.sbatch" beforeDir="false" afterPath="$PROJECT_DIR$/project1.sbatch" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/img.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/project1_model.py" beforeDir="false" afterPath="$PROJECT_DIR$/project1_model.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/resnet-18/resnet-18.log" beforeDir="false" afterPath="$PROJECT_DIR$/resnet-18/resnet-18.log" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/result/plotgraph.py" beforeDir="false" afterPath="$PROJECT_DIR$/result/plotgraph.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/result/project1_model_final.py" beforeDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -33,11 +40,13 @@
     <property name="RunOnceActivity.OpenProjectViewOnStart" value="true" />
     <property name="RunOnceActivity.ShowReadmeOnStart" value="true" />
     <property name="WebServerToolWindowFactoryState" value="false" />
-    <property name="last_opened_file_path" value="$PROJECT_DIR$/result" />
+    <property name="last_opened_file_path" value="$PROJECT_DIR$" />
     <property name="settings.editor.selected.configurable" value="com.jetbrains.python.configuration.PyActiveSdkModuleConfigurable" />
   </component>
   <component name="RecentsManager">
     <key name="CopyFile.RECENT_KEYS">
+      <recent name="$PROJECT_DIR$" />
+      <recent name="$PROJECT_DIR$/resnet-18" />
       <recent name="$PROJECT_DIR$/result" />
     </key>
     <key name="MoveFile.RECENT_KEYS">
@@ -81,7 +90,7 @@
       <option name="number" value="Default" />
       <option name="presentableId" value="Default" />
       <updated>1647985762283</updated>
-      <workItem from="1647985766178" duration="51161000" />
+      <workItem from="1647985766178" duration="67452000" />
     </task>
     <servers />
   </component>
@@ -100,6 +109,6 @@
     </option>
   </component>
   <component name="com.intellij.coverage.CoverageDataManagerImpl">
-    <SUITE FILE_PATH="coverage/Code$plotgraph.coverage" NAME="plotgraph Coverage Results" MODIFIED="1648086385827" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/result" />
+    <SUITE FILE_PATH="coverage/Code$plotgraph.coverage" NAME="plotgraph Coverage Results" MODIFIED="1648177043335" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/result" />
   </component>
 </project>
