@@ -37,6 +37,7 @@ x = open('bs-64 lr-0.150000 -ds50 -sgd -CrossEntropy.txt', 'r').readlines()
 y = open('bs-64 lr-0.200000 -ds40 -sgd -CrossEntropy.txt', 'r').readlines()
 z = open('bs-64 lr-0.200000 -ds50 -sgd -CrossEntropy.txt', 'r').readlines()
 
+
 for fa in a:
     fa = fa.strip().strip("[]").split(", ")
 
@@ -110,6 +111,12 @@ for fy in y:
 for fz in z:
     fz = fz.strip().strip("[]").split(", ")
 
+zzz = open('opti.txt').readlines()
+
+for fzzz in zzz:
+    fzzz = fzzz.strip().strip("[]").split(", ")
+
+fzzz = [float(x) for x in fzzz]
 
 fa = [float(x) for x in fa]
 fb = [float(x) for x in fb]
@@ -165,6 +172,8 @@ yw = np.array(fw)
 yx = np.array(fx)
 yy = np.array(fy)
 yz = np.array(fz)
+
+yzzz = np.array(fzzz)
 
 plt.xlim(0,210)
 plt.ylim(80,100)
@@ -232,3 +241,11 @@ plt.xlabel("Epoch")
 plt.legend()
 plt.show()
 
+plt.xlim(0,210)
+plt.ylim(80,100)
+plt.plot(x, yzzz, label = 'bs-64 lr-0.10 -ds50')
+plt.title("Accuracy of final model")
+plt.ylabel("Test Accuracy")
+plt.xlabel("Epoch")
+plt.legend()
+plt.show()
